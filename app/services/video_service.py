@@ -8,7 +8,6 @@ from app.utils import sanitize_filename
 DOWNLOAD_DIR = "downloads"
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
-MAX_DURATION_SECONDS = 1800
 
 
 def download_video(url: str, quality: str = "720", duration: int = None, title: str = None) -> dict:
@@ -35,12 +34,6 @@ def download_video(url: str, quality: str = "720", duration: int = None, title: 
     raw_title = title or info.get("title") or "video_youtube"
     final_title = sanitize_filename(raw_title)
 
-    if duration > MAX_DURATION_SECONDS:
-        raise ValueError(
-            f"El video dura {duration // 60} minutos. "
-            f"El límite máximo permitido es "
-            f"{MAX_DURATION_SECONDS // 60} minutos."
-        )
 
     file_id = str(uuid.uuid4())
     output_template = os.path.join(

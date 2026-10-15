@@ -7,8 +7,6 @@ from app.utils import sanitize_filename
 DOWNLOAD_DIR = "downloads"
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
-# Límite de seguridad: 30 minutos (1800 segundos)
-MAX_DURATION_SECONDS = 1800 
 
 def download_audio(url: str, bitrate: str = "192", duration: int = None, title: str = None) -> dict:
     """
@@ -26,9 +24,6 @@ def download_audio(url: str, bitrate: str = "192", duration: int = None, title: 
         if not title:
             title = "audio_youtube"
 
-    # Validar límite de duración para evitar saturar el disco de Koyeb
-    if duration > MAX_DURATION_SECONDS:
-        raise ValueError(f"El audio dura {duration // 60} minutos. El límite máximo permitido es de {MAX_DURATION_SECONDS // 60} minutos.")
 
     file_id = str(uuid.uuid4())
     
