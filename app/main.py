@@ -7,6 +7,8 @@ from app.schemas import InfoRequest, AudioRequest, VideoRequest
 from app.services.info_service import get_video_info
 from app.services.audio_service import download_audio
 from app.services.video_service import download_video
+from app.utils import build_content_disposition
+from urllib.parse import quote
 
 app = FastAPI(title="YouTube Downloader API")
 
@@ -32,13 +34,18 @@ async def info_endpoint(request: InfoRequest):
 @app.post("/download/audio")
 async def download_audio_endpoint(request: AudioRequest, background_tasks: BackgroundTasks):
     try:
-        result = download_audio(url=request.url, bitrate=request.bitrate)
+        result = download_audio(url=request.url, bitrate=request.bitrate, title=request.title)
         background_tasks.add_task(cleanup_file, result["filepath"])
+        
+        disposition, full_name = build_content_disposition(result["title"], result["extension"])
         
         return FileResponse(
             path=result["filepath"],
-            filename=f"{result['title']}.{result['extension']}",
-            media_type="audio/mpeg"
+            media_type="audio/mpeg",
+            headers={
+                "Content-Disposition": disposition,
+                "X-Filename": quote(full_name, encoding="utf-8"),
+            }
         )
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
@@ -49,13 +56,18 @@ async def download_audio_endpoint(request: AudioRequest, background_tasks: Backg
 @app.post("/download/video")
 async def download_video_endpoint(request: VideoRequest, background_tasks: BackgroundTasks):
     try:
-        result = download_video(url=request.url, quality=request.quality)
+        result = download_video(url=request.url, quality=request.quality, title=request.title)
         background_tasks.add_task(cleanup_file, result["filepath"])
+        
+        disposition, full_name = build_content_disposition(result["title"], result["extension"])
         
         return FileResponse(
             path=result["filepath"],
-            filename=f"{result['title']}.{result['extension']}",
-            media_type="video/mp4"
+            media_type="video/mp4",
+            headers={
+                "Content-Disposition": disposition,
+                "X-Filename": quote(full_name, encoding="utf-8"),
+            }
         )
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))

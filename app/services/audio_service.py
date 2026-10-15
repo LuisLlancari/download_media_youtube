@@ -2,6 +2,7 @@ import yt_dlp
 import os
 import uuid
 import glob
+from app.utils import sanitize_filename
 
 DOWNLOAD_DIR = "downloads"
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
@@ -9,7 +10,7 @@ os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 # Límite de seguridad: 30 minutos (1800 segundos)
 MAX_DURATION_SECONDS = 1800 
 
-def download_audio(url: str, bitrate: str = "192", duration: int = None) -> dict:
+def download_audio(url: str, bitrate: str = "192", duration: int = None, title: str = None) -> dict:
     """
     Descarga el audio de una URL de YouTube y lo convierte a MP3.
     """
@@ -18,10 +19,12 @@ def download_audio(url: str, bitrate: str = "192", duration: int = None) -> dict
         with yt_dlp.YoutubeDL({'noplaylist': True, 'skip_download': True}) as ydl:
             info = ydl.extract_info(url, download=False)
             duration = info.get('duration', 0)
-            title = info.get('title', 'audio_youtube')
+            if not title:
+                title = info.get('title', 'audio_youtube')
     else:
-        # Si ya se validó antes, obtenemos el título directamente al descargar
-        title = "audio_youtube"
+        # Si ya se validó antes, usamos el título si viene, o el por defecto
+        if not title:
+            title = "audio_youtube"
 
     # Validar límite de duración para evitar saturar el disco de Koyeb
     if duration > MAX_DURATION_SECONDS:
@@ -52,7 +55,8 @@ def download_audio(url: str, bitrate: str = "192", duration: int = None) -> dict
     # 3. Ejecutar la descarga y conversión
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info_download = ydl.extract_info(url, download=True)
-        title = info_download.get('title', title)
+        raw_title = info_download.get('title', title)
+        final_title = sanitize_filename(raw_title)
 
     downloaded_files = glob.glob(f"{DOWNLOAD_DIR}/{file_id}.*")
     if not downloaded_files:
@@ -60,6 +64,6 @@ def download_audio(url: str, bitrate: str = "192", duration: int = None) -> dict
 
     return {
         "filepath": downloaded_files[0],
-        "title": title,
+        "title": final_title,
         "extension": "mp3"
     }
