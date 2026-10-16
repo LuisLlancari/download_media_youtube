@@ -13,8 +13,14 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiamos todo el código fuente
-COPY . .
+# Copiamos el código fuente del backend
+COPY app/ ./app/
 
-# Render asigna un puerto dinámico
+# Copiamos el frontend (docs) para servirlo como archivos estáticos
+COPY docs/ ./docs/
+
+# Puerto por defecto (se puede sobreescribir con la variable PORT)
+EXPOSE 8000
+
+# Levantamos el servidor uvicorn
 CMD sh -c "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"

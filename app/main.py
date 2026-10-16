@@ -2,7 +2,7 @@ from fastapi import FastAPI, BackgroundTasks, HTTPException
 from fastapi.responses import FileResponse
 import os
 
-from app.config import setup_cors
+from app.config import setup_cors, setup_static_files
 from app.schemas import InfoRequest, AudioRequest, VideoRequest
 from app.services.info_service import get_video_info
 from app.services.audio_service import download_audio
@@ -74,6 +74,9 @@ async def download_video_endpoint(request: VideoRequest, background_tasks: Backg
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/")
+@app.get("/health")
 def health_check():
     return {"status": "API activa y modularizada."}
+
+# Montamos el frontend estático al final para no interceptar las rutas del API
+setup_static_files(app)
