@@ -1,6 +1,8 @@
+import { API_URL } from "./config.js";
+
 export async function getMediaInfo(url) {
 
-  const response = await fetch(`http://127.0.0.1:8000/info`, {
+  const response = await fetch(`${API_URL}/info`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -13,7 +15,7 @@ export async function getMediaInfo(url) {
 }
 
 export async function downloadVideo(url, quality, title = null) {
-  const response = await fetch('http://127.0.0.1:8000/download/video', {
+  const response = await fetch(`${API_URL}/download/video`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -47,12 +49,12 @@ export async function downloadVideo(url, quality, title = null) {
 }
 
 export async function downloadAudio(url, bitrate, title = null) {
-  const response = await fetch('http://127.0.0.1:8000/download/audio', {
+  const response = await fetch(`${API_URL}/download/audio`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ url: url , bitrate: bitrate, title: title})
+    body: JSON.stringify({ url: url, bitrate: bitrate, title: title })
   });
 
   if (!response.ok) {
@@ -63,13 +65,13 @@ export async function downloadAudio(url, bitrate, title = null) {
   // Obtenemos el nombre del archivo (ej: "Cancion_oficial.mp3") que envía el backend
   const contentDisposition = response.headers.get('content-disposition');
   let filename = 'audio_descargado.mp3';
-  
+
   if (contentDisposition && contentDisposition.includes('filename=')) {
     filename = contentDisposition.split('filename=')[1].replace(/["']/g, '');
   }
 
   // Convertimos la respuesta a Blob
   const blob = await response.blob();
-  
+
   return { blob, filename };
 }

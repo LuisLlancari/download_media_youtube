@@ -13,11 +13,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiamos todo el código fuente de la aplicación al contenedor
+# Copiamos todo el código fuente
 COPY . .
 
-# Exponemos el puerto que utiliza Koyeb por defecto
-EXPOSE 8000
-
-# Comando para arrancar la aplicación con Uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Render asigna un puerto dinámico
+CMD sh -c "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
