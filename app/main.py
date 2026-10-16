@@ -20,7 +20,7 @@ def cleanup_file(filepath: str):
     if os.path.exists(filepath):
         os.remove(filepath)
 
-# --- PASO 1: Obtener Metadatos ---
+# Endpoint para obtener información del video
 @app.post("/info")
 async def info_endpoint(request: InfoRequest):
     try:
@@ -30,7 +30,7 @@ async def info_endpoint(request: InfoRequest):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"No se pudo obtener información del video: {str(e)}")
 
-# --- PASO 2A: Descargar Audio ---
+# Endpoint para descargar audio
 @app.post("/download/audio")
 async def download_audio_endpoint(request: AudioRequest, background_tasks: BackgroundTasks):
     try:
@@ -52,7 +52,7 @@ async def download_audio_endpoint(request: AudioRequest, background_tasks: Backg
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# --- PASO 2B: Descargar Video ---
+# Endpoint para descargar video
 @app.post("/download/video")
 async def download_video_endpoint(request: VideoRequest, background_tasks: BackgroundTasks):
     try:

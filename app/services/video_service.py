@@ -10,7 +10,10 @@ os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
 
 
-def download_video(url: str, quality: str = "720", duration: int = None, title: str = None) -> dict:
+def download_video(url: str, quality: str = "720", title: str = None) -> dict:
+    """
+    Descarga el video de una URL de YouTube con la calidad especificada.
+    """
     # Normalizar calidad: "720p" -> "720"
     res = quality.lower().replace("p", "").strip()
 
@@ -30,7 +33,6 @@ def download_video(url: str, quality: str = "720", duration: int = None, title: 
     }) as ydl:
         info = ydl.extract_info(url, download=False)
 
-    duration = info.get("duration") or 0
     raw_title = title or info.get("title") or "video_youtube"
     final_title = sanitize_filename(raw_title)
 

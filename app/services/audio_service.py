@@ -8,26 +8,16 @@ DOWNLOAD_DIR = "downloads"
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
 
-def download_audio(url: str, bitrate: str = "192", duration: int = None, title: str = None) -> dict:
+def download_audio(url: str, bitrate: str = "192", title: str = None) -> dict:
     """
     Descarga el audio de una URL de YouTube y lo convierte a MP3.
     """
-    # 1. Si no nos pasan la duración desde el frontend, la consultamos rápidamente
-    if duration is None:
-        with yt_dlp.YoutubeDL({'noplaylist': True, 'skip_download': True}) as ydl:
-            info = ydl.extract_info(url, download=False)
-            duration = info.get('duration', 0)
-            if not title:
-                title = info.get('title', 'audio_youtube')
-    else:
-        # Si ya se validó antes, usamos el título si viene, o el por defecto
-        if not title:
-            title = "audio_youtube"
 
+    final_title = sanitize_filename(title) if title else None
 
     file_id = str(uuid.uuid4())
     
-    # 2. Configuración de yt-dlp + FFmpeg para extracción de MP3
+    # Configuración de yt-dlp + FFmpeg para extracción de MP3
     ydl_opts = {
         'outtmpl': f'{DOWNLOAD_DIR}/{file_id}.%(ext)s',
         'restrictfilenames': True,
@@ -47,11 +37,14 @@ def download_audio(url: str, bitrate: str = "192", duration: int = None, title: 
         'nocheckcertificate': True
     }
 
-    # 3. Ejecutar la descarga y conversión
+    # Ejecutar la descarga y conversión 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info_download = ydl.extract_info(url, download=True)
-        raw_title = info_download.get('title', title)
-        final_title = sanitize_filename(raw_title)
+        
+        # Si no nos pasaron título al principio
+        if not final_title:
+            raw_title = info_download.get('title', 'audio_youtube')
+            final_title = sanitize_filename(raw_title)
 
     downloaded_files = glob.glob(f"{DOWNLOAD_DIR}/{file_id}.*")
     if not downloaded_files:
