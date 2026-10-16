@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 # Dominios permitidos para consumir el API -> * todos
-ORIGINS = ["*"]
+ORIGINS = ["https://luisllancari.github.io"]
 
 # middlewares en la instancia de fastAPI
 def setup_cors(app: FastAPI):
